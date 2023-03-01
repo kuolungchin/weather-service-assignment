@@ -170,7 +170,7 @@ lazy val commonSettings =
     crossScalaVersions := Seq(scalaVersion.value, "2.13.10"),
     organization := "kuo.lung.chin",
     organizationName := "Kuo Lung (Alan) Chin",
-    startYear := Some(2019),
+    startYear := Some(2023),
     headerLicense := Some(HeaderLicense.Custom(licenseText)),
     addCompilerPlugin("com.olegpy"    %% "better-monadic-for" % "0.3.1"),
     addCompilerPlugin("org.typelevel" %% "kind-projector"     % "0.10.3"),
