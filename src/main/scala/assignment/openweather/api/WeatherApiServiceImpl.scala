@@ -37,7 +37,7 @@ final class WeatherApiServiceImpl[F[_]: Sync](weatherConditionService: WeatherCo
         }
         .handleErrorWith {
           case MalformedMessageBodyFailure(details, _) => BadRequest(details)
-          case ex                                      => BadRequest("Please valid your request")
+          case ex                                      => BadRequest("Please valid your request or API Key (appid) under resources/application.conf")
         }
   }
 }
