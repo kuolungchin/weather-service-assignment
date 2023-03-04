@@ -28,7 +28,7 @@ object ApiServer {
         val cfg = ConfigFactory.load(getClass().getClassLoader())
         loadConfigOrThrow[ClientConfig](cfg, "client")
       })
-      _      <- Stream.eval(Sync[F].delay(println("Starting Http4s Client")))
+      _      <- Stream.eval(Sync[F].delay(println("Starting Http4s Client and Server")))
       client <- Stream.resource(BlazeClientBuilder[F](global).resource)
       service = new WeatherApiServiceImpl(
         new LiveWeatherConditionService(new WeatherApiClient[F](client, clientConfig))
