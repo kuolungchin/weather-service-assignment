@@ -37,10 +37,11 @@ final class WeatherApiServiceImpl[F[_]: Sync](
 
       result.value
         .flatMap {
-          case Right(weatherMain)           => Ok(weatherMain)
-          case Left(LatLonDataError(msg))   => BadRequest(msg)
-          case Left(NotificationError(msg))  => BadRequest(msg)
-          case Left(_)                      => BadRequest("Bad Request")
+          case Right(weatherMain)          => Ok(weatherMain)
+          case Left(err)                   => {
+            System.err.println(err.getMessage)
+            BadRequest("Bad Request")
+          }
         }
         .handleErrorWith {
           case MalformedMessageBodyFailure(details, _) => BadRequest(details)
