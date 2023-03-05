@@ -4,7 +4,7 @@
 
 package assignment.openweather.service
 
-import assignment.openweather.WeatherApiClient
+import assignment.openweather.{ WeatherApiClient, model }
 import cats.effect.Sync
 import assignment.openweather.model.{ Location, WeatherReport, Error => WeatherAPIError }
 import cats.data.{ EitherT, Kleisli }
@@ -17,6 +17,8 @@ final class LiveWeatherConditionService[F[_]: Sync](
     weatherApiClient: WeatherApiClient[F],
     notificationService: NotificationService[F]
 ) extends WeatherConditionService[F] {
+  type ErrorOr[A] = Either[model.Error, A]
+
   override def getWeatherCondition(location: Location): EitherT[F, WeatherAPIError, WeatherReport] =
     for {
       weather <- weatherApiClient.getWeatherInfo(location.lat, location.lon)
@@ -47,7 +49,7 @@ final class LiveWeatherConditionService[F[_]: Sync](
         )
     } yield condition
 
-  def sendNotification(): Kleisli[F, NotificationService[F], Unit] =
+  private def sendNotification(): Kleisli[F, NotificationService[F], ErrorOr[Unit]] =
     Kleisli { notificationService: NotificationService[F] =>
       notificationService.notificationServiceModule
         .sendNotification("administrator", "someone access this API")
