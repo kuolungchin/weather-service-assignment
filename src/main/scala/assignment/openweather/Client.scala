@@ -5,11 +5,7 @@
 package assignment.openweather
 
 import assignment.openweather.config.ClientConfig
-import assignment.openweather.model.{
-  WeatherApiHttpClientError,
-  WeatherMain,
-  Error => WeatherAPIError
-}
+import assignment.openweather.model.{ WeatherApiHttpClientError, WeatherMain }
 import cats.effect._
 import org.http4s.client.Client
 import org.http4s._
@@ -21,7 +17,7 @@ class WeatherApiClient[F[_]: Concurrent](client: Client[F], clientConfig: Client
   implicit val weatherMainDecoder: EntityDecoder[F, WeatherMain] = jsonOf[F, WeatherMain]
   private val clientHostName                                     = clientConfig.host
   private val appId                                              = clientConfig.appid
-  def getWeatherInfo(lat: Double, lon: Double): EitherT[F, WeatherAPIError, WeatherMain] = {
+  def getWeatherInfo(lat: Double, lon: Double): EitherT[F, model.Error, WeatherMain] = {
     val uri = Uri
       .fromString(
         s"http://${clientHostName}/data/2.5/weather?lat=${lat}&lon=${lon}&appid=${appId}&units=imperial"
@@ -29,7 +25,7 @@ class WeatherApiClient[F[_]: Concurrent](client: Client[F], clientConfig: Client
       .toOption
       .get
     val request = Request[F](Method.GET, uri)
-    EitherT[F, WeatherAPIError, WeatherMain](client.fetch(request) { response =>
+    EitherT[F, model.Error, WeatherMain](client.fetch(request) { response =>
       response.as[WeatherMain].map(Right(_))
     }).leftMap(
       _ => WeatherApiHttpClientError("Fail to parse Weather Api Json")

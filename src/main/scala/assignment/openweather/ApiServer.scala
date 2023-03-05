@@ -6,7 +6,7 @@ package assignment.openweather
 
 import assignment.openweather.api.WeatherApiServiceImpl
 import assignment.openweather.config.{ ApiConfig, ClientConfig }
-import assignment.openweather.service.LiveWeatherConditionService
+import assignment.openweather.service.{ LiveNotificationService, LiveWeatherConditionService }
 import org.http4s.server.blaze.BlazeServerBuilder
 import org.http4s.client.blaze.BlazeClientBuilder
 import org.http4s.implicits._
@@ -31,7 +31,10 @@ object ApiServer {
       _      <- Stream.eval(Sync[F].delay(println("Starting Http4s Client and Server")))
       client <- Stream.resource(BlazeClientBuilder[F](global).resource)
       service = new WeatherApiServiceImpl(
-        new LiveWeatherConditionService(new WeatherApiClient[F](client, clientConfig))
+        new LiveWeatherConditionService(
+          new WeatherApiClient[F](client, clientConfig),
+          new LiveNotificationService[F]()
+        )
       )
       exitCode <- BlazeServerBuilder[F]
         .bindHttp(apiConfig.port.value, apiConfig.host.value)
