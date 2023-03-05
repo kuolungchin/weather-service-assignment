@@ -1,4 +1,4 @@
-name := "Weather API Practice by Alan Chin"
+name := "Weather API Practice in Cats and Cats Effect"
 
 // *****************************************************************************
 // Projects
