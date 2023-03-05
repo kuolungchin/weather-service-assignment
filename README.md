@@ -27,10 +27,11 @@ You can reference weather condition codes from: https://openweathermap.org/weath
 
 This service has the following components:
 - **http4s Server API Endpoint**: it receives a REST GET request at the endpoint of weather
-- **http4s Client: it requests openweathermap API
-- **Service Tier
-- **Channeling in EitherT[F, Error, A]
-- **Validator for Http Request JSON payload
+- **http4s Client**: it requests openweathermap API
+- **Service Tier**
+- **Channeling** in EitherT[F, Error, A]
+- **Kleisli**    dependency injection in F fashion 
+- **Validator** for Http Request JSON payload
 
 
 #### Tech Stacks
