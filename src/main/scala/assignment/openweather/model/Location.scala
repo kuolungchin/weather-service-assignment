@@ -7,7 +7,7 @@ package assignment.openweather.model
 import io.circe._
 import io.circe.generic.semiauto._
 import cats.implicits._
-
+import assignment.openweather.model.ApiError.LatLonDataError
 /**
   *  A location with lat and lng
   * @param lat
