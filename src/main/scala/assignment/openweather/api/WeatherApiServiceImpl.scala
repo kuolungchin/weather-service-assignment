@@ -37,8 +37,8 @@ final class WeatherApiServiceImpl[F[_]: Sync](
 
       result.value
         .flatMap {
-          case Right(weatherMain)          => Ok(weatherMain)
-          case Left(err)                   => {
+          case Right(weatherMain) => Ok(weatherMain)
+          case Left(err) => {
             System.err.println(err.getMessage)
             BadRequest("Bad Request")
           }
