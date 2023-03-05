@@ -32,7 +32,7 @@ final class WeatherApiServiceImpl[F[_]: Sync](
         location          <- EitherT.liftF(req.as[Location])
         validatedLocation <- EitherT.fromEither[F](Location.validate(location))
         weatherMain       <- weatherConditionService.getWeatherCondition(validatedLocation)
-        _ = sendNotification().run(notificationService)
+        _                 =  sendNotification().run(notificationService)
       } yield weatherMain
 
       result.value
