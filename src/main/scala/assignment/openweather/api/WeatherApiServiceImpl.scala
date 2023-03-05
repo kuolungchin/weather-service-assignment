@@ -30,15 +30,15 @@ final class WeatherApiServiceImpl[F[_]: Sync](
         location          <- EitherT.liftF(req.as[Location])
         validatedLocation <- EitherT.fromEither[F](Location.validate(location))
         weatherMain       <- weatherConditionService.getWeatherCondition(validatedLocation)
-        _                 <- EitherT(sendNotification().run(notificationService))  // sendNotification().run(...) returns a F[ErrorOr[Unit]] directly,
-                                                                                 // so we can wrap it in EitherT.
+        _                 <- EitherT(sendNotification().run(notificationService)) // sendNotification().run(...) returns a F[ErrorOr[Unit]] directly,
+        // so we can wrap it in EitherT.
       } yield weatherMain
 
       result.value
         .flatMap {
           case Right(weatherMain)           => Ok(weatherMain)
           case Left(LatLonDataError(msg))   => BadRequest(msg)
-          case Left(NotificationError(msg))  => BadRequest(msg)
+          case Left(NotificationError(msg)) => BadRequest(msg)
           case Left(_)                      => BadRequest("Bad Request")
         }
         .handleErrorWith {

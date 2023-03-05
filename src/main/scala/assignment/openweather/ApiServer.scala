@@ -5,8 +5,12 @@
 package assignment.openweather
 
 import assignment.openweather.api.WeatherApiServiceImpl
-import assignment.openweather.config.{ApiConfig, ClientConfig}
-import assignment.openweather.service.{LiveNotificationService, LiveWeatherConditionService}
+import assignment.openweather.config.{ ApiConfig, ClientConfig }
+import assignment.openweather.service.{
+  LiveNotificationService,
+  LiveWeatherConditionService,
+  NotificationService
+}
 import org.http4s.server.blaze.BlazeServerBuilder
 import org.http4s.client.blaze.BlazeClientBuilder
 import org.http4s.implicits._
@@ -18,11 +22,13 @@ import pureconfig.loadConfigOrThrow
 import java.util.concurrent.Executors
 import scala.concurrent.ExecutionContext
 
-
 object ApiServer {
+  type Env[F[_]] = NotificationService[F]
   val executionContext = ExecutionContext.fromExecutor(Executors.newFixedThreadPool(20))
 
-  def serve[F[_]](implicit Effect: ConcurrentEffect[F], T: Timer[F]): Stream[F, ExitCode] =
+  def serve[F[_]](implicit Effect: ConcurrentEffect[F], T: Timer[F]): Stream[F, ExitCode] = {
+    val liveNotificationServiceEnv: Env[F] = new LiveNotificationService[F]()
+
     for {
       apiConfig <- Stream.eval(Sync[F].delay {
         val cfg = ConfigFactory.load(getClass().getClassLoader())
@@ -38,11 +44,12 @@ object ApiServer {
         new LiveWeatherConditionService(
           new WeatherApiClient[F](client, clientConfig)
         ),
-        new LiveNotificationService[F]()
+        liveNotificationServiceEnv
       )
       exitCode <- BlazeServerBuilder[F]
         .bindHttp(apiConfig.port.value, apiConfig.host.value)
         .withHttpApp(service.routes.orNotFound)
         .serve
     } yield exitCode
+  }
 }
