@@ -14,4 +14,6 @@ package object openweather {
   type NonEmptyString = String Refined NonEmpty
   // A TCP port number which is valid in the range of 1 to 65535.
   type PortNumber = Int Refined Interval.Closed[W.`1`.T, W.`65535`.T]
+
+  type ErrorOr[A] = Either[model.Error, A]
 }

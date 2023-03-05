@@ -23,6 +23,9 @@ class LiveNotificationService[F[_]: Sync] extends NotificationService[F] {
         Right(
           println(s"********* Sending a notification to ${memberId} with text: ${text} *********")
         )
+//        Left(
+//          NotificationError(s"Notification Error in Sending a notification to ${memberId} with text: ${text}")
+//        )
       }
   }
 }

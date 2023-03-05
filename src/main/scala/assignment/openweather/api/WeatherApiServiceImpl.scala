@@ -4,7 +4,7 @@
 
 package assignment.openweather.api
 
-import assignment.openweather.model
+import assignment.openweather.ErrorOr
 import cats.effect.Sync
 import cats.implicits._
 import cats.data._
@@ -22,8 +22,6 @@ final class WeatherApiServiceImpl[F[_]: Sync](
     notificationService: NotificationService[F]
 ) extends Http4sDsl[F] {
 
-  type ErrorOr[A] = Either[model.Error, A]
-
   implicit def decodeProduct: EntityDecoder[F, Location] = jsonOf
 
   val routes: HttpRoutes[F] = HttpRoutes.of[F] {
@@ -32,7 +30,8 @@ final class WeatherApiServiceImpl[F[_]: Sync](
         location          <- EitherT.liftF(req.as[Location])
         validatedLocation <- EitherT.fromEither[F](Location.validate(location))
         weatherMain       <- weatherConditionService.getWeatherCondition(validatedLocation)
-        _                 =  sendNotification().run(notificationService)
+        _                 <- EitherT(sendNotification().run(notificationService))  // sendNotification().run(...) returns a F[ErrorOr[Unit]] directly,
+                                                                                 // so we can wrap it in EitherT.
       } yield weatherMain
 
       result.value
