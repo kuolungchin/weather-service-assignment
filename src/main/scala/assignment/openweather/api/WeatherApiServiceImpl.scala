@@ -4,6 +4,7 @@
 
 package assignment.openweather.api
 
+import assignment.openweather.model
 import cats.effect.Sync
 import cats.implicits._
 import cats.data._
@@ -12,12 +13,16 @@ import org.http4s.circe._
 import org.http4s.dsl._
 import assignment.openweather.model._
 import assignment.openweather.model.Location._
-import assignment.openweather.service.WeatherConditionService
+import assignment.openweather.service.{ NotificationService, WeatherConditionService }
 import org.http4s.circe.CirceEntityCodec.circeEntityEncoder
 import assignment.openweather.model.WeatherReport._
 
-final class WeatherApiServiceImpl[F[_]: Sync](weatherConditionService: WeatherConditionService[F])
-    extends Http4sDsl[F] {
+final class WeatherApiServiceImpl[F[_]: Sync](
+    weatherConditionService: WeatherConditionService[F],
+    notificationService: NotificationService[F]
+) extends Http4sDsl[F] {
+
+  type ErrorOr[A] = Either[model.Error, A]
 
   implicit def decodeProduct: EntityDecoder[F, Location] = jsonOf
 
@@ -27,13 +32,15 @@ final class WeatherApiServiceImpl[F[_]: Sync](weatherConditionService: WeatherCo
         location          <- EitherT.liftF(req.as[Location])
         validatedLocation <- EitherT.fromEither[F](Location.validate(location))
         weatherMain       <- weatherConditionService.getWeatherCondition(validatedLocation)
+        _ = sendNotification().run(notificationService)
       } yield weatherMain
 
       result.value
         .flatMap {
-          case Right(weatherMain)         => Ok(weatherMain)
-          case Left(LatLonDataError(msg)) => BadRequest(msg)
-          case Left(_)                    => BadRequest("Bad Request")
+          case Right(weatherMain)           => Ok(weatherMain)
+          case Left(LatLonDataError(msg))   => BadRequest(msg)
+          case Left(NotificationError(msg))  => BadRequest(msg)
+          case Left(_)                      => BadRequest("Bad Request")
         }
         .handleErrorWith {
           case MalformedMessageBodyFailure(details, _) => BadRequest(details)
@@ -43,4 +50,10 @@ final class WeatherApiServiceImpl[F[_]: Sync](weatherConditionService: WeatherCo
             )
         }
   }
+
+  private def sendNotification(): Kleisli[F, NotificationService[F], ErrorOr[Unit]] =
+    Kleisli { notificationService: NotificationService[F] =>
+      notificationService.notificationServiceModule
+        .sendNotification("administrator", "someone access this API")
+    }
 }

@@ -32,9 +32,9 @@ object ApiServer {
       client <- Stream.resource(BlazeClientBuilder[F](global).resource)
       service = new WeatherApiServiceImpl(
         new LiveWeatherConditionService(
-          new WeatherApiClient[F](client, clientConfig),
-          new LiveNotificationService[F]()
-        )
+          new WeatherApiClient[F](client, clientConfig)
+        ),
+        new LiveNotificationService[F]()
       )
       exitCode <- BlazeServerBuilder[F]
         .bindHttp(apiConfig.port.value, apiConfig.host.value)
