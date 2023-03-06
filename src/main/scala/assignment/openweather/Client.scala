@@ -6,7 +6,7 @@ package assignment.openweather
 
 import assignment.openweather.config.ClientConfig
 import assignment.openweather.model.ApiError.WeatherApiHttpClientError
-import assignment.openweather.model.{WeatherMain}
+import assignment.openweather.model.{ WeatherMain }
 import cats.effect._
 import org.http4s.client.Client
 import org.http4s._
