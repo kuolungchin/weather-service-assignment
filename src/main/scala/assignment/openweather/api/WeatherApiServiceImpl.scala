@@ -50,7 +50,7 @@ final class WeatherApiServiceImpl[F[_]: Sync](
           }
         }
         .handleErrorWith {
-          case err       => BadRequest("Bad Request")
+          case _       => BadRequest("Bad Request")
         }
   }
 
