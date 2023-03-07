@@ -8,8 +8,9 @@ Our weather service will receive http GET requests and take two parameters of la
 ```
 http://localhost:8080/weather
 {
-"lat" : 35.00,
-"lon" : 139.00
+  "lat" : 35.00,
+  "lon" : 139.00,
+  "userEmail": "xyxxyz@xyzgmail.com"
 }
 ```
 Our backend's http client component will use the parameters to fetch JSON data from Open Weather API,

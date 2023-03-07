@@ -28,11 +28,11 @@ final class WeatherApiServiceImpl[F[_]: Sync](
   val routes: HttpRoutes[F] = HttpRoutes.of[F] {
     case req @ GET -> Root / "weather" =>
       val result = for {
-        payload <- EitherT.liftF(req.as[WeatherRequestPayload])
-        _       <- EitherT.fromEither[F](WeatherRequestPayload.validate(payload))
-        location = Location(payload.lat, payload.lon)
+        payload     <- EitherT.liftF(req.as[WeatherRequestPayload])
+        _           <- EitherT.fromEither[F](WeatherRequestPayload.validate(payload))
+        location    = Location(payload.lat, payload.lon)
         weatherMain <- weatherConditionService.getWeatherCondition(location)
-        _           <- EitherT(sendNotification().run(notificationService))
+        _           <- EitherT(sendNotification(payload.userEmail).run(notificationService))
         // sendNotification().run(...) returns a F[ErrorOr[Unit]] directly,
         // so we can wrap it in EitherT.
       } yield weatherMain
@@ -54,9 +54,9 @@ final class WeatherApiServiceImpl[F[_]: Sync](
         }
   }
 
-  private def sendNotification(): Kleisli[F, NotificationService[F], ErrorOr[Unit]] =
+  private def sendNotification(useEmail: String): Kleisli[F, NotificationService[F], ErrorOr[Unit]] =
     Kleisli { notificationService: NotificationService[F] =>
       notificationService.notificationServiceModule
-        .sendNotification("administrator", "someone access this API")
+        .sendNotification("useEmail", s"${useEmail} use this API")
     }
 }
